@@ -14,7 +14,7 @@ class HexCell:
         (0, 1)  # South-East
     ]
 
-    def get_neighbors(self):
+    def get_neighbors_unfiltered(self):
         # Generate the neighboring hex cells based on the direction vectors
         return [(self.q + dq, self.r + dr) for dq, dr in HexCell.DIRECTIONS]
 
@@ -40,16 +40,31 @@ class HexGrid:
     def get_neighbors(self, q, r):
         cell = self.get_cell(q, r)
         if cell:
-            return cell.get_neighbors()
+            neighbors = cell.get_neighbors_unfiltered()
+            return filter((lambda x, y: 0 < x < self.width and 0 < y < self.height), neighbors)
         return []
 
     def get_neighbourhood(self, q, r, neighbourhood_size):
-        queue: list[HexCell] = []
-        queue.append(self.get_cell(q, r))
+        visited = set()
 
-        while len(queue) > 0:
-            neurode = queue.pop()
-            neighbours = neurode.get_neighbors()
+        def get_neighbourhood_inner(q, r, neighbourhood_size, neighbourhood):
+
+            if (q, r) in visited or neighbourhood_size <= 0:
+                return
+
+            visited.add((q, r))
+
+            neighbours = self.get_neighbors(q, r)
+            neighbourhood.update(neighbours)
+
+            if neighbourhood_size:
+                for n in neighbours:
+                    get_neighbourhood_inner(n.q, n.r, neighbourhood_size-1, neighbourhood)
+
+        neighbourhood = set()
+        get_neighbourhood_inner(q, r, neighbourhood_size, neighbourhood)
+
+        return neighbourhood
 
     def display(self):
         for r in range(self.height):

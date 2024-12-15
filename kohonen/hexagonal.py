@@ -10,8 +10,8 @@ class HexCell:
         (1, -1),  # North-East
         (0, -1),  # North-West
         (-1, 0),  # West
-        (-1, 1),  # South-West
-        (0, 1)  # South-East
+        (1, 1),  # South-East
+        (0, 1)  # South-West
     ]
 
     def get_neighbors_unfiltered(self):
@@ -41,7 +41,7 @@ class HexGrid:
         cell = self.get_cell(q, r)
         if cell:
             neighbors = cell.get_neighbors_unfiltered()
-            return filter((lambda x, y: 0 < x < self.width and 0 < y < self.height), neighbors)
+            return filter(lambda coords: 0 <= coords[0] < self.width and 0 <= coords[1] < self.height, neighbors)
         return []
 
     def get_neighbourhood(self, q, r, neighbourhood_size):

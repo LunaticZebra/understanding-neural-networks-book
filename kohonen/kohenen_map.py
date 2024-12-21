@@ -136,9 +136,11 @@ class KohonenNetwork:
 
 
     def train_network(self, input_patterns: list[list[float]], learning_rate: float, neighbourhood: int, num_of_epochs: int,
-                      lr_decay: float):
+                      lr_decay: float, neighbourhood_decay: bool = False):
 
         for epoch in range(num_of_epochs):
+            if neighbourhood_decay:
+                neighbourhood = math.ceil(neighbourhood * (1 - (epoch/num_of_epochs)))
 
             for pattern in input_patterns:
                 winning_neurode = self.process_input(pattern)

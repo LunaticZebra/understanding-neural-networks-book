@@ -57,7 +57,9 @@ def manhattan_distance(x: list[float], y: list[float]) -> float:
 
 
 class KohonenNetwork:
-    def __init__(self, input_layer_size: int, kohonen_layer_size: int, shape: tuple[int, int], topology_type: Topology):
+    def __init__(self, input_layer_size: int, kohonen_layer_size: int, shape: tuple[int, int], topology_type: Topology,
+                 distance_function: Callable[[list[float], list[float]], float] = euclidean_distance):
+
         self.width = shape[0]
         self.height = shape[1]
 
@@ -68,6 +70,20 @@ class KohonenNetwork:
             ]
             for _ in range(self.height)
         ]
+        self.distance_matrix = None
+        if topology_type.DISTANCE_BASED:
+            self.distance_matrix = [[[[0.0 for _ in range(self.width)] for _ in range(self.height)]
+              for _ in range(self.width)] for _ in range(self.height)]
+            for y1 in range(len(self.input_layer_weights)):
+                for x1 in range(len(self.input_layer_weights[y1])):
+                    for y2 in range(y1, len(self.input_layer_weights)):
+                        offset_x2 = 0
+                        if y2 == y1:
+                            offset_x2 = x1
+                        for x2 in range(offset_x2, len(self.input_layer_weights[y2])):
+                            distance = distance_function(self.input_layer_weights[y1][x1], self.input_layer_weights[y2][x2])
+                            self.distance_matrix[y1][x1][y2][x2] = distance
+                            self.distance_matrix[y2][x2][y1][x1] = distance
 
         self.kohonen_layer_size = kohonen_layer_size
         self.input_layer_size = input_layer_size
@@ -95,10 +111,14 @@ class KohonenNetwork:
 
     def adjust_weights(self, winning_neurode: tuple[int, int], neighbourhood_size: int, input_pattern: list[float],
                        learning_rate: float,
-                       distance_function: Callable[[list[float], list[float]], float]) -> None:
+                       distance_function: Callable[[list[float], list[float]], float],
+                       distance_based_adjacency: bool) -> None:
 
         neurodes_to_adjust = []
-        neurodes_to_adjust.extend(self.get_neighbours(winning_neurode, neighbourhood_size))
+        if distance_based_adjacency is False:
+            neurodes_to_adjust.extend(self.get_neighbours(winning_neurode, neighbourhood_size))
+        else:
+
 
         for n in neurodes_to_adjust:
 
@@ -133,9 +153,14 @@ class KohonenNetwork:
 
         return neighbours
 
-    def train_network(self, input_patterns: list[list[float]], learning_rate: float, neighbourhood: int,
+    def get_neighbours_distance_based(self, neurode: tuple[int, int], neighbourhood: float):
+
+    def train_network(self, input_patterns: list[list[float]], learning_rate: float, neighbourhood: float,
                       num_of_epochs: int,
-                      lr_decay: float, neighbourhood_decay: bool = False):
+                      lr_decay: float, neighbourhood_decay: bool = False, distance_based_adjacency: bool = False,):
+
+        if self.topology_type != Topology.DISTANCE_BASED:
+            neighbourhood = int(neighbourhood)
 
         for epoch in range(num_of_epochs):
             if neighbourhood_decay:

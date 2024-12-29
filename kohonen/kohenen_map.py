@@ -3,6 +3,7 @@ import random
 from typing import Callable
 from kohonen_layer_topologies import Topology
 from hexagonal import *
+import numpy as np
 
 def get_top_bottom_neighbours(neurode: tuple[int, int], rows: int, shift: int) -> list[tuple[int, int]]:
     neighbours = []
@@ -44,6 +45,10 @@ def euclidean_distance(x: list[float], y: list[float]) -> float:
 
     return distance ** 0.5
 
+def mexican_hat_function(winning_neurode_weight: list[float],neighbouring_neurode_weight: list[float],sigma: float):
+    r = euclidean_distance(winning_neurode_weight,neighbouring_neurode_weight)
+
+    return (1 - (r ** 2 / sigma ** 2)) * (math.e ** (-r ** 2 / (2 * sigma ** 2)))
 
 def manhattan_distance(x: list[float], y: list[float]) -> float:
     distance = 0
@@ -56,7 +61,8 @@ def manhattan_distance(x: list[float], y: list[float]) -> float:
 
 class KohonenNetwork:
     def __init__(self, input_layer_size: int, kohonen_layer_size: int, shape: tuple[int, int], topology_type: Topology,
-                 distance_function: Callable[[list[float], list[float]], float] = euclidean_distance):
+                 distance_function: Callable[[list[float], list[float]], float] = euclidean_distance,
+                 lateral_inhibition: bool = False):
 
         self.width = shape[0]
         self.height = shape[1]
@@ -69,11 +75,22 @@ class KohonenNetwork:
             for _ in range(self.height)
         ]
 
+        self.lateral_inhibition_weights = None
+        if lateral_inhibition:
+                self.lateral_inhibition_weights = [
+                    [random.uniform(0, 1) for _ in range(self.width)]
+                    for _ in range(self.height)
+                ]
+
         self.distance_function = distance_function
         self.kohonen_layer_size = kohonen_layer_size
         self.input_layer_size = input_layer_size
         self.shape = shape
         self.topology_type = topology_type
+
+    def adjust_lateral_inhibition_weights(self):\
+        # Pomyśl jak to zaimplementować, rozrysuj jak to rozumiesz i porównaj z obecnym podejściem
+        return None
 
     def process_input(self, input_pattern: list[float]) -> tuple[int, int]:
 

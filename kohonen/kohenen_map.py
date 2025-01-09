@@ -63,8 +63,7 @@ def manhattan_distance(x: list[float], y: list[float]) -> float:
 
 class KohonenNetwork:
     def __init__(self, input_layer_size: int, kohonen_layer_size: int, shape: tuple[int, int], topology_type: Topology,
-                 distance_function: Callable[[list[float], list[float]], float] = euclidean_distance,
-                 lateral_inhibition: bool = False):
+                 distance_function: Callable[[list[float], list[float]], float] = euclidean_distance):
 
         self.width = shape[0]
         self.height = shape[1]
@@ -76,23 +75,13 @@ class KohonenNetwork:
             ]
             for _ in range(self.height)
         ]
-
-        self.lateral_inhibition_weights = None
-        if lateral_inhibition:
-            self.lateral_inhibition_weights = [
-                [random.uniform(0, 1) for _ in range(self.width)]
-                for _ in range(self.height)
-            ]
-
         self.distance_function = distance_function
         self.kohonen_layer_size = kohonen_layer_size
         self.input_layer_size = input_layer_size
         self.shape = shape
         self.topology_type = topology_type
 
-    def adjust_lateral_inhibition_weights(self): \
-            # Pomyśl jak to zaimplementować, rozrysuj jak to rozumiesz i porównaj z obecnym podejściem
-        return None
+
 
     def process_input(self, input_pattern: list[float]) -> tuple[int, int]:
 

@@ -3,7 +3,7 @@ import random
 from typing import Callable
 from kohonen_layer_topologies import Topology
 from hexagonal import *
-import numpy as np
+
 
 def get_top_bottom_neighbours(neurode: tuple[int, int], rows: int, shift: int) -> list[tuple[int, int]]:
     neighbours = []
@@ -45,10 +45,12 @@ def euclidean_distance(x: list[float], y: list[float]) -> float:
 
     return distance ** 0.5
 
-def mexican_hat_function(winning_neurode_weight: list[float],neighbouring_neurode_weight: list[float],sigma: float):
-    r = euclidean_distance(winning_neurode_weight,neighbouring_neurode_weight)
+
+def mexican_hat_function(winning_neurode_weight: list[float], neighbouring_neurode_weight: list[float], sigma: float):
+    r = euclidean_distance(winning_neurode_weight, neighbouring_neurode_weight)
 
     return (1 - (r ** 2 / sigma ** 2)) * (math.e ** (-r ** 2 / (2 * sigma ** 2)))
+
 
 def manhattan_distance(x: list[float], y: list[float]) -> float:
     distance = 0
@@ -77,10 +79,10 @@ class KohonenNetwork:
 
         self.lateral_inhibition_weights = None
         if lateral_inhibition:
-                self.lateral_inhibition_weights = [
-                    [random.uniform(0, 1) for _ in range(self.width)]
-                    for _ in range(self.height)
-                ]
+            self.lateral_inhibition_weights = [
+                [random.uniform(0, 1) for _ in range(self.width)]
+                for _ in range(self.height)
+            ]
 
         self.distance_function = distance_function
         self.kohonen_layer_size = kohonen_layer_size
@@ -88,8 +90,8 @@ class KohonenNetwork:
         self.shape = shape
         self.topology_type = topology_type
 
-    def adjust_lateral_inhibition_weights(self):\
-        # Pomyśl jak to zaimplementować, rozrysuj jak to rozumiesz i porównaj z obecnym podejściem
+    def adjust_lateral_inhibition_weights(self): \
+            # Pomyśl jak to zaimplementować, rozrysuj jak to rozumiesz i porównaj z obecnym podejściem
         return None
 
     def process_input(self, input_pattern: list[float]) -> tuple[int, int]:
@@ -111,31 +113,27 @@ class KohonenNetwork:
 
         return kohonen_neurode
 
-
     def adjust_weights(self, winning_neurode: tuple[int, int], neighbourhood_size: int, input_pattern: list[float],
                        learning_rate: float) -> None:
 
         neurodes_to_adjust = []
-
 
         neurodes_to_adjust.extend(self.get_neighbours(winning_neurode, neighbourhood_size))
 
         for n in neurodes_to_adjust:
 
             distance = self.distance_function(self.input_layer_weights[winning_neurode[1]][winning_neurode[0]],
-                                         self.input_layer_weights[n[1]][n[0]])
+                                              self.input_layer_weights[n[1]][n[0]])
             weight_change_multiplier = math.e ** -((distance ** 2) / (neighbourhood_size ** 2))
             delta_vector = learning_law(learning_rate, input_pattern, self.input_layer_weights[n[1]][n[0]])
             for i in range(len(self.input_layer_weights[n[1]][n[0]])):
                 self.input_layer_weights[n[1]][n[0]][i] += delta_vector[i] * weight_change_multiplier
-
 
         delta_vector = learning_law(learning_rate, input_pattern,
                                     self.input_layer_weights[winning_neurode[1]][winning_neurode[0]])
 
         for i in range(len(self.input_layer_weights[winning_neurode[1]][winning_neurode[0]])):
             self.input_layer_weights[winning_neurode[1]][winning_neurode[0]][i] += delta_vector[i]
-
 
     def get_neighbours(self, neurode: tuple[int, int], neighbourhood: int):
         columns, rows = self.shape
@@ -163,7 +161,6 @@ class KohonenNetwork:
         for epoch in range(num_of_epochs):
             if neighbourhood_decay:
                 neighbourhood = math.ceil(neighbourhood * (1 - (epoch / num_of_epochs)))
-
 
             for pattern in input_patterns:
                 winning_neurode = self.process_input(pattern)
